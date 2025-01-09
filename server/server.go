@@ -96,10 +96,6 @@ func NewServer(ctx context.Context, profile *profile.Profile, store *store.Store
 
 func (s *Server) Start(ctx context.Context) error {
 	address := fmt.Sprintf("%s:%d", s.Profile.Addr, s.Profile.Port)
-	// listener, err := net.Listen("tcp", address)
-	// if err != nil {
-	// 	return errors.Wrap(err, "failed to listen")
-	// }
 
 	var listener net.Listener
 	if s.Profile.TLSEnabled {
@@ -120,17 +116,6 @@ func (s *Server) Start(ctx context.Context) error {
 			return errors.Wrap(err, "failed to listen")
 		}
 	}
-
-
-	// From Echo!
-	// s.TLSConfig = new(tls.Config)
-	// s.TLSConfig.Certificates = make([]tls.Certificate, 1)
-	// if s.TLSConfig.Certificates[0], err = tls.X509KeyPair(cert, key); err != nil {
-	// 	e.startupMutex.Unlock()
-	// 	return
-	// }
-
-
 
 	muxServer := cmux.New(listener)
 	go func() {
