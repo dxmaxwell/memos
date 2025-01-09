@@ -44,6 +44,9 @@ var (
 				DSN:         viper.GetString("dsn"),
 				InstanceURL: viper.GetString("instance-url"),
 				Version:     version.GetCurrentVersion(viper.GetString("mode")),
+				TLSEnabled:  viper.GetBool("tls"),
+				TLSCertPath: viper.GetString("tls-cert"),
+				TLSKeyPath:  viper.GetString("tls-key"),
 			}
 			if err := instanceProfile.Validate(); err != nil {
 				panic(err)
@@ -110,6 +113,9 @@ func init() {
 	rootCmd.PersistentFlags().String("driver", "sqlite", "database driver")
 	rootCmd.PersistentFlags().String("dsn", "", "database source name(aka. DSN)")
 	rootCmd.PersistentFlags().String("instance-url", "", "the url of your memos instance")
+	rootCmd.PersistentFlags().Bool("tls", false, "enable tls")
+	rootCmd.PersistentFlags().String("tls-cert", "", "tls certificate file path")
+	rootCmd.PersistentFlags().String("tls-key", "", "tls key file path")
 
 	if err := viper.BindPFlag("mode", rootCmd.PersistentFlags().Lookup("mode")); err != nil {
 		panic(err)
@@ -132,6 +138,15 @@ func init() {
 	if err := viper.BindPFlag("instance-url", rootCmd.PersistentFlags().Lookup("instance-url")); err != nil {
 		panic(err)
 	}
+	if err := viper.BindPFlag("tls", rootCmd.PersistentFlags().Lookup("tls")); err != nil {
+		panic(err)
+	}
+	if err := viper.BindPFlag("tls-cert", rootCmd.PersistentFlags().Lookup("tls-cert")); err != nil {
+		panic(err)
+	}
+	if err := viper.BindPFlag("tls-key", rootCmd.PersistentFlags().Lookup("tls-key")); err != nil {
+		panic(err)
+	}
 
 	viper.SetEnvPrefix("memos")
 	viper.AutomaticEnv()
@@ -150,8 +165,11 @@ addr: %s
 port: %d
 mode: %s
 driver: %s
+tls: %v
+tls-cert: %s
+tls-key: %s
 ---
-`, profile.Version, profile.Data, profile.DSN, profile.Addr, profile.Port, profile.Mode, profile.Driver)
+`, profile.Version, profile.Data, profile.DSN, profile.Addr, profile.Port, profile.Mode, profile.Driver, profile.TLSEnabled, profile.TLSCertPath, profile.TLSKeyPath)
 
 	print(greetingBanner)
 	if len(profile.Addr) == 0 {

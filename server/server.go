@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"time"
+	"crypto/tls"
 
 	"github.com/google/uuid"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -95,10 +96,41 @@ func NewServer(ctx context.Context, profile *profile.Profile, store *store.Store
 
 func (s *Server) Start(ctx context.Context) error {
 	address := fmt.Sprintf("%s:%d", s.Profile.Addr, s.Profile.Port)
-	listener, err := net.Listen("tcp", address)
-	if err != nil {
-		return errors.Wrap(err, "failed to listen")
+	// listener, err := net.Listen("tcp", address)
+	// if err != nil {
+	// 	return errors.Wrap(err, "failed to listen")
+	// }
+
+	var listener net.Listener
+	if s.Profile.TLSEnabled {
+		cert, err := tls.LoadX509KeyPair(s.Profile.TLSCertPath, s.Profile.TLSKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to load tls cert")
+		}
+		listener, err = tls.Listen("tcp", address, &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		})
+		if err != nil {
+			return errors.Wrap(err, "failed to tls listen")
+		}
+	} else {
+		var err error
+		listener, err = net.Listen("tcp", address)
+		if err != nil {
+			return errors.Wrap(err, "failed to listen")
+		}
 	}
+
+
+	// From Echo!
+	// s.TLSConfig = new(tls.Config)
+	// s.TLSConfig.Certificates = make([]tls.Certificate, 1)
+	// if s.TLSConfig.Certificates[0], err = tls.X509KeyPair(cert, key); err != nil {
+	// 	e.startupMutex.Unlock()
+	// 	return
+	// }
+
+
 
 	muxServer := cmux.New(listener)
 	go func() {

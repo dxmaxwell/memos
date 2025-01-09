@@ -30,6 +30,12 @@ type Profile struct {
 	Version string
 	// InstanceURL is the url of your memos instance.
 	InstanceURL string
+	// TLSEnabled enables TLS (ie HTTPS) server
+	TLSEnabled bool
+	// TLSCertPath is the certificate file path (required for TLS)
+	TLSCertPath string
+	// TLSKeyPath is the key file path (required for TLS)
+	TLSKeyPath string
 }
 
 func (p *Profile) IsDev() bool {
